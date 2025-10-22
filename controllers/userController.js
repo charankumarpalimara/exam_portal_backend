@@ -106,12 +106,17 @@ exports.createUser = async (req, res) => {
       ...(userType === 'Candidate' && { hallTicket: finalHallTicket })
     };
 
-    // Remove password field for Candidates if it's empty
-    if (userType === 'Candidate' && (!userData.password || userData.password === '')) {
-      delete userData.password;
-    }
+// Remove password field for Candidates if it's empty
+if (userType === 'Candidate' && (!userData.password || userData.password === '')) {
+  delete userData.password;
+}
 
-    const user = await User.create(userData);
+// Remove username field for Candidates if it's empty
+if (userType === 'Candidate' && (!userData.username || userData.username === '')) {
+  delete userData.username;
+}
+
+const user = await User.create(userData);
 
     // Remove password from response
     user.password = undefined;
