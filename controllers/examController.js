@@ -219,6 +219,77 @@ exports.deleteResult = async (req, res) => {
   }
 };
 
+// @desc    Update exam result (Admin only)
+// @route   PUT /api/exams/results/:id
+// @access  Private/Admin
+exports.updateResult = async (req, res) => {
+  try {
+    const { questions } = req.body;
+
+    if (!questions || !Array.isArray(questions)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide questions array'
+      });
+    }
+
+    const result = await Result.findById(req.params.id);
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: 'Result not found'
+      });
+    }
+
+    // Recalculate scores based on updated answers
+    let correctAnswers = 0;
+    let wrongAnswers = 0;
+    let attemptedQuestions = 0;
+
+    questions.forEach(question => {
+      if (question.userAnswer) {
+        attemptedQuestions++;
+        const isCorrect = question.userAnswer === question.correctAnswer;
+        
+        if (isCorrect) {
+          correctAnswers++;
+        } else {
+          wrongAnswers++;
+        }
+      }
+    });
+
+    // Calculate final score (+1 for correct, -1 for wrong, 0 for unattempted)
+    const score = correctAnswers - wrongAnswers;
+    const totalQuestions = result.totalQuestions;
+    const percentage = ((score / totalQuestions) * 100).toFixed(2);
+
+    // Update the result
+    result.questions = questions;
+    result.correctAnswers = correctAnswers;
+    result.wrongAnswers = wrongAnswers;
+    result.attemptedQuestions = attemptedQuestions;
+    result.score = score;
+    result.percentage = parseFloat(percentage);
+    result.updatedAt = new Date();
+
+    await result.save();
+
+    res.status(200).json({
+      success: true,
+      data: result,
+      message: 'Result updated successfully'
+    });
+
+  } catch (error) {
+    console.error('Update Result Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating result'
+    });
+};
+
 // @desc    Get exam statistics
 // @route   GET /api/exams/statistics
 // @access  Private/Admin

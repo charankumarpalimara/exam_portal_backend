@@ -6,6 +6,7 @@ const {
   getAllResults,
   getResultById,
   deleteResult,
+  updateResult,
   getStatistics
 } = require('../controllers/examController');
 const { protect, authorize } = require('../middleware/auth');
@@ -24,6 +25,7 @@ router.get('/statistics', authorize('Admin'), getStatistics);
 // Shared routes
 router.route('/results/:id')
   .get(getResultById)
+  .put(authorize('Admin'), updateResult)
   .delete(authorize('Admin'), deleteResult);
 
 module.exports = router;
