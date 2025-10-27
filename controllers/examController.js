@@ -288,6 +288,7 @@ exports.updateResult = async (req, res) => {
       success: false,
       message: 'Error updating result'
     });
+  }
 };
 
 // @desc    Get exam statistics
@@ -334,4 +335,12 @@ exports.getStatistics = async (req, res) => {
   }
 };
 
-  }
+module.exports = {
+  submitExam: exports.submitExam,
+  getMyResults: exports.getMyResults,
+  getAllResults: exports.getAllResults,
+  getResultById: exports.getResultById,
+  deleteResult: exports.deleteResult,
+  updateResult: exports.updateResult,
+  getStatistics: exports.getStatistics
+};
